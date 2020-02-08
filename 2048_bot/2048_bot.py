@@ -15,26 +15,22 @@ Prerequisites:
 
         pacman -S geckodriver
 """
+import copy
 import time
 import datetime
 import random
 
 from selenium import webdriver
+from selenium.common import exceptions
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
 
+import game
 
 BROWSER = webdriver.Firefox()
 BROWSER.get('https://play2048.co')
 GAME_CONTAINER = BROWSER.find_elements_by_class_name('game-container')[0]
 MAX_SCORE = 0
-ACTIONS = [
-    Keys.ARROW_UP,
-    Keys.ARROW_DOWN,
-    Keys.ARROW_LEFT,
-    Keys.ARROW_RIGHT,
-]
 
 
 def restart_game():
@@ -64,9 +60,18 @@ def play_once(i):
     possible to make a move
     """
     while True:
+        _game = None
+        while True:
+            try:
+                _game = game.GameContainer(browser=BROWSER)
+                break
+            except exceptions.StaleElementReferenceException:
+                pass
+
         ActionChains(BROWSER).key_down(
-            random.sample(ACTIONS, k=1)[0]
+            _game.next_move()
         ).perform()
+
         try:
             time.sleep(0.01)
             _ = BROWSER.find_elements_by_class_name('game-over')[0]
