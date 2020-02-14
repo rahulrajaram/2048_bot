@@ -56,20 +56,39 @@ class Matrix:
         return inverted_matrix
 
     def optimal_next_state(self):
-        scores = dict()
-        scores['l'] = self.on_left()
-        scores['r'] = self.on_right()
-        scores['u'] = self.on_up()
-        scores['d'] = self.on_down()
-        # print(scores)
+        max_depth = 3
+        current_depth = 0
+
+        scores = self._optimal_next_state(
+            max_depth=max_depth,
+            current_depth=current_depth
+        )
+
         return max(scores, key=scores.get)
+
+    def _optimal_next_state(self, max_depth, current_depth):
+        scores = dict()
+        scores['l'] = self.on_left(max_depth, current_depth)
+        scores['r'] = self.on_right(max_depth, current_depth)
+        scores['u'] = self.on_up(max_depth, current_depth)
+        scores['d'] = self.on_down(max_depth, current_depth)
+
+        for key in scores:
+            subdict = scores[key]
+            scores[key] = subdict[max(subdict, key=subdict.get)]
+        return scores
 
     def _handle_altered_row(
             self,
             matrix,
+            maximum_depth,
+            current_depth,
             reverse=False,
             action_code=None
     ):
+        if current_depth == maximum_depth:
+            return 0
+
         altered_matrix = []
         score_increment = 0
         for row in matrix:
@@ -97,19 +116,39 @@ class Matrix:
             altered_matrix.append(altered_row)
         if altered_matrix == matrix and score_increment == 0:
             score_increment = -1
-        return score_increment
+            scores = dict()
+            scores['left'] = score_increment
+            scores['right'] = score_increment
+            scores['up'] = score_increment
+            scores['down'] = score_increment
+            return scores
 
-    def on_right(self):
-        return self._handle_altered_row(self.matrix, reverse=True, action_code='right')
+        scores = dict()
+        for direction in ['left', 'right', 'up', 'down']:
+            scores['left'] = self._handle_altered_row(copy.deepcopy(altered_matrix), maximum_depth, current_depth + 1, action_code='left')
+            scores['right'] = self._handle_altered_row(copy.deepcopy(altered_matrix), maximum_depth, current_depth + 1, action_code='right', reverse=True)
+            scores['up'] = self._handle_altered_row(copy.deepcopy(self.invert(altered_matrix)), maximum_depth, current_depth + 1, action_code='up')
+            scores['down'] = self._handle_altered_row(copy.deepcopy(self.invert(altered_matrix)), maximum_depth, current_depth + 1, action_code='down', reverse=True)
+            for key in scores:
+                subdict = scores[key]
+                if not isinstance(subdict, dict):
+                    continue
+                scores[key] = subdict[max(subdict, key=subdict.get)]
+            for direction in scores:
+                scores[direction] += score_increment
+        return scores
+
+    def on_right(self, maximum_depth, current_depth):
+        return self._handle_altered_row(self.matrix, maximum_depth, current_depth, reverse=True, action_code='right')
     
-    def on_left(self):
-        return self._handle_altered_row(self.matrix, action_code='left')
+    def on_left(self, maximum_depth, current_depth):
+        return self._handle_altered_row(self.matrix, maximum_depth, current_depth, action_code='left')
 
-    def on_up(self):
-        return self._handle_altered_row(self.inverted_matrix, action_code='up')
+    def on_up(self, maximum_depth, current_depth):
+        return self._handle_altered_row(self.inverted_matrix, maximum_depth, current_depth, action_code='up')
 
-    def on_down(self):
-        return self._handle_altered_row(self.inverted_matrix, reverse=True, action_code='down')
+    def on_down(self, maximum_depth, current_depth):
+        return self._handle_altered_row(self.inverted_matrix, maximum_depth, current_depth, reverse=True, action_code='down')
 
 
 class GameContainer:
