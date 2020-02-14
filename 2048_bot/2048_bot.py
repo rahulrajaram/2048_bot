@@ -82,12 +82,7 @@ def play_once(i):
 
 
 def main():
-    """
-    Function plays the 2048 game a 100 times before cleaning up Firefox
-    """
-    for i in range(1, 101):
-        play_once(i)
-        restart_game()
+    play_once(1)
     BROWSER.stop_client()
     BROWSER.quit()
     print(f'Highest score: {MAX_SCORE}')
