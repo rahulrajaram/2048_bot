@@ -3,14 +3,6 @@ import copy
 from selenium.webdriver.common.keys import Keys
 
 
-ACTIONS = [
-    Keys.ARROW_UP,
-    Keys.ARROW_DOWN,
-    Keys.ARROW_LEFT,
-    Keys.ARROW_RIGHT,
-]
-
-
 class Tile:
     def __init__(
             self,
@@ -127,10 +119,10 @@ class GameContainer:
     def next_move(self):
         next_state = self.matrix.optimal_next_state()
         if next_state == 'u':
-            return ACTIONS[0]
+            return Keys.ARROW_UP
         if next_state == 'd':
-            return ACTIONS[1]
+            return Keys.ARROW_DOWN
         if next_state == 'l':
-            return ACTIONS[2]
+            return Keys.ARROW_LEFT
         if next_state == 'r':
-            return ACTIONS[3]
+            return Keys.ARROW_RIGHT
