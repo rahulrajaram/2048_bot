@@ -2,6 +2,7 @@ import copy
 
 from selenium.webdriver.common.keys import Keys
 
+WEIGHTING = 6
 
 class Tile:
     def __init__(
@@ -100,7 +101,7 @@ class Matrix:
             skip_next = False
             for i in range(len(altered_row) - 1):
                 if altered_row[i] == altered_row[i + 1] and not skip_next:
-                    score_increment += altered_row[i + 1] * 2
+                    score_increment += (altered_row[i + 1] * 2) ** (WEIGHTING + (1/(current_depth + 1)))
                     altered_row[i + 1] = altered_row[i + 1] * 2
                     removed.append(i)
                     skip_next = True
